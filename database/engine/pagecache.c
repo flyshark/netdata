@@ -1114,7 +1114,9 @@ pg_cache_lookup_next(struct rrdengine_instance *ctx, struct pg_cache_page_index 
             print_page_cache_descr(descr);
         if (!(flags & RRD_PAGE_POPULATED))
             page_not_in_cache = 1;
-        pg_cache_wait_event_unsafe(descr);
+//        pg_cache_wait_event_unsafe(descr);
+        if (pg_cache_timedwait_event_unsafe(descr, 1) == UV_ETIMEDOUT)
+            error_report("Page cache timeout while waiting for page %p", descr);
         rrdeng_page_descr_mutex_unlock(ctx, descr);
 
         /* reset scan to find again */
