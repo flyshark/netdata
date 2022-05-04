@@ -66,7 +66,6 @@ struct aclk_query {
     char *msg_id;
 
     struct timeval created_tv;
-    int timeout;
     usec_t created;
     int timeout;
     aclk_query_t next;
