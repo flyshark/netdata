@@ -765,6 +765,11 @@ void *health_main(void *ptr) {
 
                 info("Resuming health checks on host '%s'.", host->hostname);
                 host->health_delay_up_to = 0;
+#if defined(ENABLE_ACLK) && defined(ENABLE_NEW_CLOUD_PROTOCOL)
+                if (netdata_cloud_setting) {
+                    sql_queue_removed_alerts_to_aclk(host);
+                }
+#endif
             }
 
             if(likely(!host->health_log_fp) && (loop == 1 || loop % cleanup_sql_every_loop == 0))
