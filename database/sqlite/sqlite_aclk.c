@@ -459,7 +459,7 @@ void aclk_database_worker(void *arg)
             opcode = cmd.opcode;
             ++cmd_batch_size;
 
-            if(likely(opcode != ACLK_DATABASE_NOOP))
+            if (likely(opcode != ACLK_DATABASE_NOOP))
                 worker_is_busy(opcode);
 
             switch (opcode) {
@@ -467,7 +467,7 @@ void aclk_database_worker(void *arg)
                     /* the command queue was empty, do nothing */
                     break;
 
-// MAINTENANCE
+                    // MAINTENANCE
                 case ACLK_DATABASE_CLEANUP:
                     debug(D_ACLK_SYNC, "Database cleanup for %s", wc->host_guid);
                     sql_maint_aclk_sync_database(wc, cmd);
@@ -476,7 +476,7 @@ void aclk_database_worker(void *arg)
                     break;
 
                 case ACLK_DATABASE_DELETE_HOST:
-                    debug(D_ACLK_SYNC,"Cleaning ACLK tables for %s", (char *) cmd.data);
+                    debug(D_ACLK_SYNC, "Cleaning ACLK tables for %s", (char *)cmd.data);
                     sql_delete_aclk_table_list(wc, cmd);
                     break;
 
@@ -499,17 +499,17 @@ void aclk_database_worker(void *arg)
                     aclk_send_chart_config(wc, cmd);
                     break;
                 case ACLK_DATABASE_CHART_ACK:
-                    debug(D_ACLK_SYNC, "ACK chart SEQ for %s to %"PRIu64, wc->uuid_str, (uint64_t) cmd.param1);
+                    debug(D_ACLK_SYNC, "ACK chart SEQ for %s to %" PRIu64, wc->uuid_str, (uint64_t)cmd.param1);
                     aclk_receive_chart_ack(wc, cmd);
                     break;
                 case ACLK_DATABASE_RESET_CHART:
-                    debug(D_ACLK_SYNC, "RESET chart SEQ for %s to %"PRIu64, wc->uuid_str, (uint64_t) cmd.param1);
+                    debug(D_ACLK_SYNC, "RESET chart SEQ for %s to %" PRIu64, wc->uuid_str, (uint64_t)cmd.param1);
                     aclk_receive_chart_reset(wc, cmd);
                     break;
 #endif
-// ALERTS
+                    // ALERTS
                 case ACLK_DATABASE_PUSH_ALERT_CONFIG:
-                    debug(D_ACLK_SYNC,"Pushing chart config info to the cloud for %s", wc->host_guid);
+                    debug(D_ACLK_SYNC, "Pushing chart config info to the cloud for %s", wc->host_guid);
                     aclk_push_alert_config_event(wc, cmd);
                     break;
                 case ACLK_DATABASE_PUSH_ALERT:
@@ -529,23 +529,23 @@ void aclk_database_worker(void *arg)
                     sql_process_queue_removed_alerts_to_aclk(wc, cmd);
                     break;
 
-// NODE OPERATIONS
+                    // NODE OPERATIONS
                 case ACLK_DATABASE_NODE_INFO:
-                    debug(D_ACLK_SYNC,"Sending node info for %s", wc->uuid_str);
+                    debug(D_ACLK_SYNC, "Sending node info for %s", wc->uuid_str);
                     sql_build_node_info(wc, cmd);
                     break;
 #ifdef ENABLE_NEW_CLOUD_PROTOCOL
                 case ACLK_DATABASE_DIM_DELETION:
-                    debug(D_ACLK_SYNC,"Sending dimension deletion information %s", wc->uuid_str);
+                    debug(D_ACLK_SYNC, "Sending dimension deletion information %s", wc->uuid_str);
                     aclk_process_dimension_deletion(wc, cmd);
                     break;
                 case ACLK_DATABASE_UPD_RETENTION:
-                    debug(D_ACLK_SYNC,"Sending retention info for %s", wc->uuid_str);
+                    debug(D_ACLK_SYNC, "Sending retention info for %s", wc->uuid_str);
                     aclk_update_retention(wc, cmd);
                     aclk_process_dimension_deletion(wc, cmd);
                     break;
 
-// NODE_INSTANCE DETECTION
+                    // NODE_INSTANCE DETECTION
                 case ACLK_DATABASE_ORPHAN_HOST:
                     wc->host = NULL;
                     wc->is_orphan = 1;
@@ -571,6 +571,8 @@ void aclk_database_worker(void *arg)
                         cmd.completion = NULL;
                         wc->node_info_send = aclk_database_enq_cmd_noblock(wc, &cmd);
                     }
+                    if (localhost == wc->host)
+                        (void) sqlite3_wal_checkpoint(db_meta, NULL);
                     break;
                 default:
                     debug(D_ACLK_SYNC, "%s: default.", __func__);
